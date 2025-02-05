@@ -5,10 +5,10 @@ import numpy as np
 
 app = Flask(__name__)
 
-model = pickle.load(open('rfmodel2.pkl', 'rb'))
+model = pickle.load(open('svm_model_BBP.pkl', 'rb'))
 selected_symptoms = []  # Initialize `selected_symptoms`
 prediction_made = False  # Initialize `prediction_made` to False
-model_urti = pickle.load(open('rfmodelurti.pkl', 'rb'))
+model_urti = pickle.load(open('svm_model_urti.pkl', 'rb'))
 selected_symptoms_urti = []  # Initialize `selected_symptoms`
 prediction_made_urti = False  # Initialize `prediction_made` to False
 
@@ -47,7 +47,7 @@ def urtipredict():
         out = "No prediction (no symptoms selected)"
     else:
         all_symptoms_urti = ["Chills", "Cough", "Difficulty_breathing", "Sputum_production", "Sore_throat", "Headache", "Runny_nose", "Eye_pain", "Seizures", "Tick_bites", 
-                        "Abdominal_pain", "Vomiting", "Diarrhoea", "Rash", "Joint_aches", "Muscle_aches", "Dark_urine"]
+                        "Abdominal_pain", "Vomiting", "Diarrhoea", "Blood_in_stool", "Bleeding", "Bruising", "Rash", "Joint_aches", "Muscle_aches", "Dark_urine", "Jaundice"]
         input_features = [1 if symptom in selected_symptoms_urti else 0 for symptom in all_symptoms_urti]
         final = np.array(input_features, dtype=float)
         out = model_urti.predict([final])[0]
