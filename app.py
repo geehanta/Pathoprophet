@@ -8,7 +8,7 @@ app = Flask(__name__)
 model = pickle.load(open('svm_model_BBP.pkl', 'rb'))
 selected_symptoms = []  # Initialize `selected_symptoms`
 prediction_made = False  # Initialize `prediction_made` to False
-model_urti = pickle.load(open('svm_model_urti.pkl', 'rb'))
+model_urti = pickle.load(open('rfmodelurti.pkl', 'rb'))
 selected_symptoms_urti = []  # Initialize `selected_symptoms`
 prediction_made_urti = False  # Initialize `prediction_made` to False
 
