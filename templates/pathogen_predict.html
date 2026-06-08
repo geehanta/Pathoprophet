@@ -1,154 +1,291 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
-  <title> AI</title>
-
-  <!-- CSS  -->
+  <title>PathoProphet — Blood Borne Pathogens</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="./static/css/materialize.css" type="text/css" rel="stylesheet" media="screen,projection"/>
-  <link href="./static/css2/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+  <link href="{{ url_for('static', filename='css/glass.css') }}" rel="stylesheet"/>
 </head>
+<body>
 
-<body style="height: fit-content; background-color: grey lighten-1;">
-  <ul id="dropdown1" class="dropdown-content">
-    <li><a href="#">BBP</a></li>
-    <li><a href="{{ url_for('urti_predict') }}">URTI</a></li>
-    <li class="divider"></li>
-    <li><a href="#!">About</a></li>
-</ul>
-<nav class="grey darken-3">
-    <div class="nav-wrapper">
-        <!-- Add an image in the logo -->
-        <a href="static\images\kemri-logo.png" class="brand-logo" style="padding-left: 20px;"><img src="static\images\kemri-logo.png" alt="Logo" style="margin-right: 20px;" width="55px" class="circle"></a>
-        <a id="logo-container" href="#" class="brand-logo" style="padding-left: 10em;"> <strong>PATHO</strong>PROPHET</a>
-        <ul class="right hide-on-med-and-down">
-          <!-- Dropdown Trigger -->
-          <li><a class="dropdown-trigger" href="#!" data-target="dropdown1">Pathogen Prediction<i class="material-icons right">arrow_drop_down</i></a></li>
-<!--             <li><a href="sass.html">Diagnosis</a></li>
-            <li><a href="badges.html">Prescription</a></li> -->
-            
-        </ul>
-    </div>
-</nav>
+  <!-- ── ANIMATED BLOB SCENE ── -->
+  <div class="scene" aria-hidden="true">
+    <div class="scene__blob scene__blob--1"></div>
+    <div class="scene__blob scene__blob--2"></div>
+    <div class="scene__blob scene__blob--3"></div>
+  </div>
 
-
-  <div class="section no-pad-bot" id="index-banner">
-    <div class="container">
-      <br><br>
-      <h5 class="header center brown-text text-lighten-1"> <b>Blood Borne Pathogens</b><strong> Prediction</strong></h5>
-      <div class="card-panel">
-        <div class="col s2">
-          <img src="images/yuna.jpg" alt="" class="circle responsive-img"> <!-- notice the "circle" class -->
+  <!-- ── NAVIGATION ── -->
+  <nav class="glass-nav-bar" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner">
+      <div class="brand">
+        <img src="{{ url_for('static', filename='images/kemri-logo.png') }}"
+             alt="KEMRI Logo" class="nav-logo"/>
+        <span class="brand-name">
+          <span class="brand-accent">PATHO</span>PROPHET
+        </span>
+      </div>
+      <div class="nav-links">
+        <div class="glass glass-nav" role="group" aria-label="Module selection">
+          <a href="{{ url_for('hello_world') }}"
+             class="glass-nav__item is-active" aria-current="page">BBP</a>
+          <a href="{{ url_for('urti_predict') }}"
+             class="glass-nav__item">URTI</a>
         </div>
-        <span class="teal-text text-darken-2"><blockquote >
-          The AFI Pathogen Prediction System is a web-based application that uses artificial intelligence to predict the presence of pathogens in clinical samples.
-           The system is powered by a large dataset of patient records and pathogen data, and it is able to provide accurate predictions in a matter of seconds. 
-           The AFI Pathogen Prediction System can help clinicians to make better decisions about patient care,
-           and it can help to improve the overall outcomes of patients with infectious diseases.
-        </blockquote></span>
-      </div>  
-      <br>
-      <br>
-      <div class="row center">
-        <h6 class="header col s12 light"> Choose subjects symptoms below:  </h6>
-        <br>
-        </h5>
+        <span class="nav-sep" aria-hidden="true"></span>
+        <button class="theme-toggle" id="themeToggle"
+                onclick="toggleTheme()"
+                aria-label="Toggle colour scheme"
+                title="Toggle light / dark mode">
+          <span class="material-icons theme-icon">light_mode</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── PAGE CONTENT ── -->
+  <div class="page-wrap">
+
+    <!-- HERO -->
+    <header class="hero">
+      <div class="hero-badge">
+        <span class="hero-badge__dot"></span>
+        Blood Borne Pathogens
+      </div>
+      <h1 class="hero__title">
+        Pathogen <em>Prediction</em>
+      </h1>
+      <div class="glass glass-card info-card">
+        <span class="material-icons info-icon">biotech</span>
+        <p class="info-text">
+          The AFI Pathogen Prediction System uses AI to predict the presence of
+          pathogens based on clinical manifestations. Powered by patient records
+          and pathogen data — accurate predictions in seconds to support better
+          clinical decisions.
+        </p>
+      </div>
+    </header>
+
+    <!-- SYMPTOM SELECTION FORM -->
+    <form action="/predict" method="post" id="predict-form" novalidate>
+
+      <div class="glass glass-card chips-card">
+        <div class="section-header">
+          <span class="material-icons">medical_services</span>
+          <h2 class="section-title">Select Presenting Symptoms</h2>
+        </div>
+        <p class="section-sub">Tap each symptom that applies — selected chips are highlighted.</p>
+
+        <div class="glass-chip-group" id="chipsGrid" role="group" aria-label="Symptom chips">
+
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Chills">
+            <span class="chip-icon">🥶</span><span class="chip-label">Chills</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Cough">
+            <span class="chip-icon">🫁</span><span class="chip-label">Cough</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Difficulty_breathing">
+            <span class="chip-icon">😮‍💨</span><span class="chip-label">Difficulty Breathing</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Sputum_production">
+            <span class="chip-icon">💧</span><span class="chip-label">Sputum Production</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Sore_throat">
+            <span class="chip-icon">🔴</span><span class="chip-label">Sore Throat</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Headache">
+            <span class="chip-icon">🤕</span><span class="chip-label">Headache</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Runny_nose">
+            <span class="chip-icon">🤧</span><span class="chip-label">Runny Nose</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Eye_pain">
+            <span class="chip-icon">👁️</span><span class="chip-label">Eye Pain</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Tick_bites">
+            <span class="chip-icon">🪲</span><span class="chip-label">Tick Bites</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Abdominal_pain">
+            <span class="chip-icon">🫃</span><span class="chip-label">Abdominal Pain</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Vomiting">
+            <span class="chip-icon">🤢</span><span class="chip-label">Vomiting</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Diarrhoea">
+            <span class="chip-icon">🚽</span><span class="chip-label">Diarrhoea</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Seizures">
+            <span class="chip-icon">⚡</span><span class="chip-label">Seizures</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Blood_in_stool">
+            <span class="chip-icon">🩸</span><span class="chip-label">Blood in Stool</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Bleeding">
+            <span class="chip-icon">🩹</span><span class="chip-label">Bleeding</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Bruising">
+            <span class="chip-icon">🟣</span><span class="chip-label">Bruising</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Rash">
+            <span class="chip-icon">🔆</span><span class="chip-label">Rash</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Joint_aches">
+            <span class="chip-icon">🦴</span><span class="chip-label">Joint Aches</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Muscle_aches">
+            <span class="chip-icon">💪</span><span class="chip-label">Muscle Aches</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Dark_urine">
+            <span class="chip-icon">🟤</span><span class="chip-label">Dark Urine</span>
+          </span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Jaundice">
+            <span class="chip-icon">🟡</span><span class="chip-label">Jaundice</span>
+          </span>
+
+        </div><!-- /glass-chip-group -->
+
+        <!-- selected count pill -->
+        <div class="selected-summary" id="selectedSummary" role="status" aria-live="polite">
+          <span class="material-icons">check_circle</span>
+          <span id="selectedCount">0 symptoms selected</span>
+        </div>
+      </div><!-- /chips-card -->
+
+      <!-- ACTION BUTTONS -->
+      <div class="action-row" style="margin-top: 8px;">
+        <button type="submit" class="glass-btn glass-btn--primary" onclick="prepareSubmit()">
+          <span class="material-icons">biotech</span>
+          Predict Pathogen
+        </button>
+        <button type="button" class="glass-btn glass-btn--ghost" id="reset-button">
+          <span class="material-icons">refresh</span>
+          Reset
+        </button>
       </div>
 
-              <div class="row">
-    <form action='/predict' method="post" class="col s12" style="height: 30vh;">
-      <div class="row">
-        <div class="input-field col s12">
-          <select multiple name="symptoms">
-           <!-- <option value=""  selected disabled>Selected:</option> -->
-            <option value="Chills">Chills</option>
-            <option value="Cough">Cough</option>
-            <option value="Difficulty_breathing">Difficulty breathing</option>
-            <option value="Sputum_production">Sputum production</option>
-            <option value="Sore_throat">Sore throat</option>
-            <option value="Headache">Headache</option>
-            <option value="Runny_nose">Runny nose</option>
-            <option value="Eye_pain">Eye pain</option>  
-            <option value="Tick_bites">Tick bites</option>
-            <option value="Abdominal_pain">Abdominal pain</option>
-            <option value="Vomiting">Vomiting</option>
-            <option value="Diarrhoea">Diarrhoea</option>
-            <option value="Seizures">Seizures</option>
-            <option value="Blood_in_stool">Blood in Stool</option>
-            <option value="Bleeding">Bleeding</option>
-            <option value="Bruising">Bruising</option>
-            <option value="Rash">Rash</option>
-            <option value="Joint_Aches">Joint Aches</option>
-            <option value="Muscle_aches">Muscle aches</option>
-            <option value="Dark_urine">Dark Urine</option>
-            <option value="Jaundice">Jaundice</option>
-          </select>
-          <label><b>Selected Symptoms:</b> </label>
-          
-        </div>
-       <script src="static\js\materialize.min.js"></script>
-        <script>
-          
-          // Function to clear the prediction result after a delay
-          function clearPrediction() {
-              var predText = document.getElementById('pred-text');
-              predText.textContent = '';
+    </form><!-- /predict-form -->
+
+    <!-- PREDICTION RESULT BUBBLE -->
+    {% if pred %}
+    <div class="glass result-bubble" id="pred-bubble" role="alert" aria-live="polite">
+      <div class="result-pulse"></div>
+      <div class="result-icon-wrap">
+        <span class="material-icons result-icon">science</span>
+      </div>
+      <div class="result-label">Predicted Pathogen</div>
+      <div class="result-value" id="pred-text">
+        {{ pred | replace(' Answer:  ', '') }}
+      </div>
+      <div class="result-disclaimer">
+        AI-generated prediction — confirm with laboratory results
+      </div>
+    </div>
+    {% endif %}
+
+  </div><!-- /page-wrap -->
+
+  <footer class="glass-footer">
+    <span>PathoProphet</span>
+    <span class="footer-sep">·</span>
+    <span>USAMRU-K / KEMRI</span>
+    <span class="footer-sep">·</span>
+    <span>AI-assisted clinical support</span>
+  </footer>
+
+  <script>
+    /* ── THEME ─────────────────────────────────────────── */
+    (function () {
+      const saved = localStorage.getItem('pp-theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+        const ic = document.querySelector('.theme-icon');
+        if (ic) ic.textContent = saved === 'dark' ? 'light_mode' : 'dark_mode';
+      }
+    })();
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.querySelector('.theme-icon').textContent =
+        next === 'dark' ? 'light_mode' : 'dark_mode';
+      localStorage.setItem('pp-theme', next);
+    }
+
+    /* ── CHIP SELECTION ────────────────────────────────── */
+    const selected = new Set();
+
+    function initChips() {
+      document.querySelectorAll('.glass-chip').forEach(chip => {
+        chip.addEventListener('click', () => toggleChip(chip));
+        chip.addEventListener('keydown', e => {
+          if (e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault();
+            toggleChip(chip);
           }
-      
-          document.addEventListener('DOMContentLoaded', function() {
-              $(".dropdown-trigger").dropdown({ hover: false });
-              var elems = document.querySelectorAll('select');
-              var instances = M.FormSelect.init(elems);
-      
-              var resetButton = document.getElementById('reset-button');
-              resetButton.addEventListener('click', function() {
-                  var predText = document.getElementById('pred-text');
-                  predText.textContent = ''; // Clear the content of the pred text object
-      
-                  var elems = document.querySelectorAll('select');
-                  var instances = M.FormSelect.init(elems);
-              });
-      
-              var predText = document.getElementById('pred-text');
-              if (predText.textContent) {
-                  // Clear the prediction result after 20 seconds
-                  setTimeout(clearPrediction, 20000); // 20000 milliseconds (5 seconds)
-              endif
-              }
-          });
-      </script>
-      </div>
+        });
+      });
+    }
 
-      <div class="row center">
-          <button type="submit" class="btn-large waves-effect waves-light brown lighten-2" name="action">Predict Pathogen</button>
-          <button type="button" class="btn-large waves-effect waves-light grey darken-2" id="reset-button">Reset Prediction </button>
-    </form>
-      </div>
+    function toggleChip(chip) {
+      const val = chip.dataset.value;
+      if (selected.has(val)) {
+        selected.delete(val);
+        chip.classList.remove('is-selected');
+        chip.setAttribute('aria-checked', 'false');
+      } else {
+        selected.add(val);
+        chip.classList.add('is-selected');
+        chip.setAttribute('aria-checked', 'true');
+      }
+      updateCount();
+    }
 
-      <br>
-        <div id="pred-text">{{pred}}</div><br>
-    </div>
-  </div>
+    function updateCount() {
+      const n = selected.size;
+      const el = document.getElementById('selectedCount');
+      el.textContent = n === 0
+        ? '0 symptoms selected'
+        : `${n} symptom${n > 1 ? 's' : ''} selected`;
+      document.getElementById('selectedSummary')
+              .classList.toggle('has-selection', n > 0);
+    }
 
+    function prepareSubmit() {
+      const form = document.getElementById('predict-form');
+      form.querySelectorAll('input[name="symptoms"]').forEach(el => el.remove());
+      selected.forEach(val => {
+        const inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = 'symptoms'; inp.value = val;
+        form.appendChild(inp);
+      });
+    }
 
-    <br><br>
-  </div>
-  </div>
-  <br>
-  <br>
-  <br>
-  <br>
-  
-  
+    /* ── RESET ─────────────────────────────────────────── */
+    document.getElementById('reset-button').addEventListener('click', () => {
+      selected.clear();
+      document.querySelectorAll('.glass-chip.is-selected').forEach(c => {
+        c.classList.remove('is-selected');
+        c.setAttribute('aria-checked', 'false');
+      });
+      updateCount();
+      const b = document.getElementById('pred-bubble');
+      if (b) { b.style.opacity = '0'; b.style.transform = 'scale(0.9)'; }
+    });
 
-  <!--  Scripts-->
-  
-  <script src="static\js\jquery-2.1.1.min.js"></script>
-  <script src="static\js\materialize.js"></script>
-  <script src="static\js\init.js"></script>
+    /* ── AUTO DISMISS RESULT ───────────────────────────── */
+    const bubble = document.getElementById('pred-bubble');
+    if (bubble) {
+      setTimeout(() => {
+        bubble.style.transition = 'opacity 1s, transform 1s';
+        bubble.style.opacity = '0';
+        bubble.style.transform = 'scale(0.92)';
+      }, 20000);
+    }
 
-  </body>
+    initChips();
+  </script>
+</body>
 </html>
-
