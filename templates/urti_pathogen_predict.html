@@ -7,10 +7,139 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="{{ url_for('static', filename='css/glass.css') }}" rel="stylesheet"/>
+
+  <style>
+    /* ── POPUP OVERLAY ─────────────────────────────────────────────── */
+    .popup-backdrop {
+      position: fixed; inset: 0; z-index: 900;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+      animation: backdrop-in 0.3s ease both;
+    }
+    @keyframes backdrop-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .popup-backdrop.is-hiding {
+      animation: backdrop-out 0.5s ease forwards;
+    }
+    @keyframes backdrop-out {
+      to { opacity: 0; }
+    }
+
+    /* ── POPUP CARD (URTI — sky/cyan variant) ──────────────────────── */
+    .popup-card {
+      position: relative;
+      width: 100%; max-width: 420px;
+      border-radius: 28px;
+      padding: 40px 36px 32px;
+      background: linear-gradient(135deg,
+        rgba(56,189,248,0.18) 0%,
+        rgba(99,102,241,0.12) 100%);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      border: 1px solid rgba(56,189,248,0.35);
+      box-shadow:
+        0 0 80px rgba(56,189,248,0.18),
+        0 24px 64px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.20);
+      display: flex; flex-direction: column;
+      align-items: center; gap: 12px;
+      text-align: center;
+      animation: popup-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+      overflow: hidden;
+    }
+    @keyframes popup-in {
+      from { opacity: 0; transform: scale(0.78) translateY(32px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .popup-backdrop.is-hiding .popup-card {
+      animation: popup-out 0.45s cubic-bezier(0.4,0,1,1) forwards;
+    }
+    @keyframes popup-out {
+      to { opacity: 0; transform: scale(0.88) translateY(16px); }
+    }
+    .popup-card::before {
+      content: "";
+      position: absolute; inset: 0; border-radius: inherit;
+      background: linear-gradient(135deg,
+        rgba(255,255,255,0.22) 0%,
+        rgba(255,255,255,0) 45%);
+      pointer-events: none;
+    }
+    .popup-ring {
+      position: absolute; inset: 0; border-radius: inherit;
+      border: 2px solid rgba(56,189,248,0.40);
+      animation: pulse-ring 2s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes pulse-ring {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.3; transform:scale(1.012); }
+    }
+    .popup-icon-wrap {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: rgba(56,189,248,0.18);
+      border: 1px solid rgba(56,189,248,0.45);
+      box-shadow: 0 0 28px rgba(56,189,248,0.25);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 1;
+    }
+    .popup-icon { font-size: 30px !important; color: #38bdf8; }
+    .popup-label {
+      font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(255,255,255,0.50); position: relative; z-index: 1;
+    }
+    [data-theme="light"] .popup-label { color: rgba(15,23,42,0.50); }
+    .popup-value {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.5rem, 4vw, 2.1rem);
+      font-weight: 800; line-height: 1.15;
+      color: #38bdf8; position: relative; z-index: 1;
+    }
+    [data-theme="light"] .popup-value { color: #0369a1; }
+    .popup-disclaimer {
+      font-size: 0.74rem; color: rgba(255,255,255,0.38);
+      position: relative; z-index: 1; margin-top: 4px;
+    }
+    [data-theme="light"] .popup-disclaimer { color: rgba(15,23,42,0.38); }
+    .popup-close {
+      position: absolute; top: 14px; right: 16px;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.55); font-size: 14px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, color 0.2s; z-index: 2;
+    }
+    .popup-close:hover {
+      background: rgba(239,68,68,0.25);
+      border-color: rgba(239,68,68,0.4); color: #f87171;
+    }
+    .popup-progress {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 0 0 28px 28px; overflow: hidden;
+    }
+    .popup-progress__fill {
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #6366f1);
+      width: 100%;
+      animation: progress-drain 3s linear forwards;
+    }
+    @keyframes progress-drain {
+      from { width: 100%; }
+      to   { width: 0%; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- ── ANIMATED BLOB SCENE (cyan/sky hue shift for URTI) ── -->
+  <!-- ── ANIMATED BLOB SCENE ── -->
   <div class="scene" aria-hidden="true">
     <div class="scene__blob scene__blob--1" style="background:radial-gradient(circle,#38bdf8,#0ea5e9)"></div>
     <div class="scene__blob scene__blob--2" style="background:radial-gradient(circle,#6366f1,#38bdf8)"></div>
@@ -29,16 +158,13 @@
       </div>
       <div class="nav-links">
         <div class="glass glass-nav" role="group" aria-label="Module selection">
-          <a href="{{ url_for('hello_world') }}"
-             class="glass-nav__item">BBP</a>
+          <a href="{{ url_for('hello_world') }}" class="glass-nav__item">BBP</a>
           <a href="{{ url_for('urti_predict') }}"
              class="glass-nav__item is-active" aria-current="page">URTI</a>
         </div>
         <span class="nav-sep" aria-hidden="true"></span>
-        <button class="theme-toggle" id="themeToggle"
-                onclick="toggleTheme()"
-                aria-label="Toggle colour scheme"
-                title="Toggle light / dark mode">
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()"
+                aria-label="Toggle colour scheme" title="Toggle light / dark mode">
           <span class="material-icons theme-icon">light_mode</span>
         </button>
       </div>
@@ -48,15 +174,12 @@
   <!-- ── PAGE CONTENT ── -->
   <div class="page-wrap">
 
-    <!-- HERO -->
     <header class="hero">
       <div class="hero-badge hero-badge--urti">
         <span class="hero-badge__dot"></span>
         Upper Respiratory Tract Infections
       </div>
-      <h1 class="hero__title">
-        URTI <em>Prediction</em>
-      </h1>
+      <h1 class="hero__title">URTI <em>Prediction</em></h1>
       <div class="glass glass-card info-card">
         <span class="material-icons info-icon" style="color:#38bdf8">air</span>
         <p class="info-text">
@@ -68,9 +191,7 @@
       </div>
     </header>
 
-    <!-- SYMPTOM SELECTION FORM -->
     <form action="/urti-predict" method="post" id="predict-form" novalidate>
-
       <div class="glass glass-card chips-card">
         <div class="section-header">
           <span class="material-icons" style="color:#38bdf8">air</span>
@@ -79,68 +200,31 @@
         <p class="section-sub">Tap each symptom that applies — selected chips are highlighted.</p>
 
         <div class="glass-chip-group" id="chipsGrid" role="group" aria-label="Symptom chips">
-
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Chills">
-            <span class="chip-icon">🥶</span><span class="chip-label">Chills</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Cough">
-            <span class="chip-icon">🫁</span><span class="chip-label">Cough</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Difficulty_breathing">
-            <span class="chip-icon">😮‍💨</span><span class="chip-label">Difficulty Breathing</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Sputum_production">
-            <span class="chip-icon">💧</span><span class="chip-label">Sputum Production</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Sore_throat">
-            <span class="chip-icon">🔴</span><span class="chip-label">Sore Throat</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Headache">
-            <span class="chip-icon">🤕</span><span class="chip-label">Headache</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Runny_nose">
-            <span class="chip-icon">🤧</span><span class="chip-label">Runny Nose</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Eye_pain">
-            <span class="chip-icon">👁️</span><span class="chip-label">Eye Pain</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Seizures">
-            <span class="chip-icon">⚡</span><span class="chip-label">Seizures</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Tick_bites">
-            <span class="chip-icon">🪲</span><span class="chip-label">Tick Bites</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Abdominal_pain">
-            <span class="chip-icon">🫃</span><span class="chip-label">Abdominal Pain</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Vomiting">
-            <span class="chip-icon">🤢</span><span class="chip-label">Vomiting</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Diarrhoea">
-            <span class="chip-icon">🚽</span><span class="chip-label">Diarrhoea</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Rash">
-            <span class="chip-icon">🔆</span><span class="chip-label">Rash</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Joint_Aches">
-            <span class="chip-icon">🦴</span><span class="chip-label">Joint Aches</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Muscle_aches">
-            <span class="chip-icon">💪</span><span class="chip-label">Muscle Aches</span>
-          </span>
-          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Dark_urine">
-            <span class="chip-icon">🟤</span><span class="chip-label">Dark Urine</span>
-          </span>
-
-        </div><!-- /glass-chip-group -->
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Chills"><span class="chip-icon">🥶</span><span class="chip-label">Chills</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Cough"><span class="chip-icon">🫁</span><span class="chip-label">Cough</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Difficulty_breathing"><span class="chip-icon">😮‍💨</span><span class="chip-label">Difficulty Breathing</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Sputum_production"><span class="chip-icon">💧</span><span class="chip-label">Sputum Production</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Sore_throat"><span class="chip-icon">🔴</span><span class="chip-label">Sore Throat</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Headache"><span class="chip-icon">🤕</span><span class="chip-label">Headache</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Runny_nose"><span class="chip-icon">🤧</span><span class="chip-label">Runny Nose</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Eye_pain"><span class="chip-icon">👁️</span><span class="chip-label">Eye Pain</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Seizures"><span class="chip-icon">⚡</span><span class="chip-label">Seizures</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Tick_bites"><span class="chip-icon">🪲</span><span class="chip-label">Tick Bites</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Abdominal_pain"><span class="chip-icon">🫃</span><span class="chip-label">Abdominal Pain</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Vomiting"><span class="chip-icon">🤢</span><span class="chip-label">Vomiting</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Diarrhoea"><span class="chip-icon">🚽</span><span class="chip-label">Diarrhoea</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Rash"><span class="chip-icon">🔆</span><span class="chip-label">Rash</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Joint_Aches"><span class="chip-icon">🦴</span><span class="chip-label">Joint Aches</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Muscle_aches"><span class="chip-icon">💪</span><span class="chip-label">Muscle Aches</span></span>
+          <span class="glass glass-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="Dark_urine"><span class="chip-icon">🟤</span><span class="chip-label">Dark Urine</span></span>
+        </div>
 
         <div class="selected-summary" id="selectedSummary" role="status" aria-live="polite">
           <span class="material-icons">check_circle</span>
           <span id="selectedCount">0 symptoms selected</span>
         </div>
-      </div><!-- /chips-card -->
+      </div>
 
-      <!-- ACTION BUTTONS -->
       <div class="action-row" style="margin-top: 8px;">
         <button type="submit" class="glass-btn glass-btn--urti" onclick="prepareSubmit()">
           <span class="material-icons">air</span>
@@ -151,27 +235,29 @@
           Reset
         </button>
       </div>
-
-    </form><!-- /predict-form -->
-
-    <!-- PREDICTION RESULT BUBBLE -->
-    {% if urtipred %}
-    <div class="glass result-bubble urti-result" id="pred-bubble" role="alert" aria-live="polite">
-      <div class="result-pulse"></div>
-      <div class="result-icon-wrap">
-        <span class="material-icons result-icon">air</span>
-      </div>
-      <div class="result-label">Predicted Pathogen</div>
-      <div class="result-value" id="pred-text">
-        {{ urtipred | replace(' Answer:  ', '') }}
-      </div>
-      <div class="result-disclaimer">
-        AI-generated prediction — confirm with laboratory results
-      </div>
-    </div>
-    {% endif %}
+    </form>
 
   </div><!-- /page-wrap -->
+
+  <!-- ── RESULT POPUP ── -->
+  {% if urtipred %}
+  <div class="popup-backdrop" id="popup-backdrop" role="dialog"
+       aria-modal="true" aria-label="Prediction result">
+    <div class="popup-card">
+      <div class="popup-ring"></div>
+      <button class="popup-close" id="popup-close" aria-label="Close">✕</button>
+      <div class="popup-icon-wrap">
+        <span class="material-icons popup-icon">air</span>
+      </div>
+      <div class="popup-label">Predicted Pathogen</div>
+      <div class="popup-value">{{ urtipred | replace(' Answer:  ', '') }}</div>
+      <div class="popup-disclaimer">AI prediction — confirm with laboratory results</div>
+      <div class="popup-progress">
+        <div class="popup-progress__fill"></div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 
   <footer class="glass-footer">
     <span>PathoProphet</span>
@@ -182,7 +268,7 @@
   </footer>
 
   <script>
-    /* ── THEME ─────────────────────────────────────────── */
+    /* ── THEME ──────────────────────────────────────────── */
     (function () {
       const saved = localStorage.getItem('pp-theme');
       if (saved) {
@@ -191,7 +277,6 @@
         if (ic) ic.textContent = saved === 'dark' ? 'light_mode' : 'dark_mode';
       }
     })();
-
     function toggleTheme() {
       const html = document.documentElement;
       const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
@@ -201,44 +286,33 @@
       localStorage.setItem('pp-theme', next);
     }
 
-    /* ── CHIP SELECTION ────────────────────────────────── */
+    /* ── CHIPS ──────────────────────────────────────────── */
     const selected = new Set();
-
     function initChips() {
       document.querySelectorAll('.glass-chip').forEach(chip => {
         chip.addEventListener('click', () => toggleChip(chip));
         chip.addEventListener('keydown', e => {
-          if (e.key === ' ' || e.key === 'Enter') {
-            e.preventDefault();
-            toggleChip(chip);
-          }
+          if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleChip(chip); }
         });
       });
     }
-
     function toggleChip(chip) {
       const val = chip.dataset.value;
       if (selected.has(val)) {
-        selected.delete(val);
-        chip.classList.remove('is-selected');
+        selected.delete(val); chip.classList.remove('is-selected');
         chip.setAttribute('aria-checked', 'false');
       } else {
-        selected.add(val);
-        chip.classList.add('is-selected');
+        selected.add(val); chip.classList.add('is-selected');
         chip.setAttribute('aria-checked', 'true');
       }
       updateCount();
     }
-
     function updateCount() {
       const n = selected.size;
-      document.getElementById('selectedCount').textContent = n === 0
-        ? '0 symptoms selected'
-        : `${n} symptom${n > 1 ? 's' : ''} selected`;
-      document.getElementById('selectedSummary')
-              .classList.toggle('has-selection', n > 0);
+      document.getElementById('selectedCount').textContent =
+        n === 0 ? '0 symptoms selected' : `${n} symptom${n>1?'s':''} selected`;
+      document.getElementById('selectedSummary').classList.toggle('has-selection', n > 0);
     }
-
     function prepareSubmit() {
       const form = document.getElementById('predict-form');
       form.querySelectorAll('input[name="symptoms_urti"]').forEach(el => el.remove());
@@ -249,26 +323,34 @@
       });
     }
 
-    /* ── RESET ─────────────────────────────────────────── */
+    /* ── RESET ──────────────────────────────────────────── */
     document.getElementById('reset-button').addEventListener('click', () => {
       selected.clear();
       document.querySelectorAll('.glass-chip.is-selected').forEach(c => {
-        c.classList.remove('is-selected');
-        c.setAttribute('aria-checked', 'false');
+        c.classList.remove('is-selected'); c.setAttribute('aria-checked', 'false');
       });
       updateCount();
-      const b = document.getElementById('pred-bubble');
-      if (b) { b.style.opacity = '0'; b.style.transform = 'scale(0.9)'; }
     });
 
-    /* ── AUTO DISMISS ──────────────────────────────────── */
-    const bubble = document.getElementById('pred-bubble');
-    if (bubble) {
-      setTimeout(() => {
-        bubble.style.transition = 'opacity 1s, transform 1s';
-        bubble.style.opacity = '0';
-        bubble.style.transform = 'scale(0.92)';
-      }, 15000);
+    /* ── POPUP AUTO-DISMISS (3 s) ───────────────────────── */
+    const backdrop = document.getElementById('popup-backdrop');
+    const closeBtn = document.getElementById('popup-close');
+
+    function dismissPopup() {
+      if (!backdrop) return;
+      backdrop.classList.add('is-hiding');
+      setTimeout(() => backdrop.remove(), 500);
+    }
+
+    if (backdrop) {
+      setTimeout(dismissPopup, 3000);
+      closeBtn.addEventListener('click', dismissPopup);
+      backdrop.addEventListener('click', e => {
+        if (e.target === backdrop) dismissPopup();
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') dismissPopup();
+      });
     }
 
     initChips();
